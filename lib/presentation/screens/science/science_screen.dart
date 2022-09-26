@@ -12,8 +12,8 @@ class ScienceScreen extends StatelessWidget {
     return BlocConsumer<NewsCubit, NewsStates>(
       listener: (context, state) {},
       builder: (context, state) {
-        var list = NewsCubit.science;
-        return Component.articleBuilder(list);
+        var list = NewsCubit.get(context).science;
+        return Component.articleBuilder(list,context);
       },
     );
   }

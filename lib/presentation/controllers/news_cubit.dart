@@ -4,18 +4,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:newsapp/presentation/screens/business/business_screen.dart';
 import 'package:newsapp/presentation/screens/science/science_screen.dart';
 import 'package:newsapp/presentation/screens/sports/sports_screen.dart';
-
-import '../../core/network/dio_helper.dart';
-import '../screens/settings/settings.dart';
+import '../../core/network/remote/dio_helper.dart';
 
 class NewsCubit extends Cubit<NewsStates> {
   NewsCubit() : super(NewsInitiState());
 
   static NewsCubit get(context) => BlocProvider.of(context);
 
-  static int currentIndex = 0;
+  int currentIndex = 0;
 
-  static List<dynamic> business = [];
+  List<dynamic> business = [];
   void getBusiness() {
     emit(NewsBusinessLoadingState());
     DioHelper.getData(
@@ -37,7 +35,7 @@ class NewsCubit extends Cubit<NewsStates> {
     });
   }
 
-  static List<dynamic> sports = [];
+  List<dynamic> sports = [];
   void getSports() {
     emit(NewsSportsLoadingState());
     DioHelper.getData(
@@ -59,7 +57,7 @@ class NewsCubit extends Cubit<NewsStates> {
     });
   }
 
- static List<dynamic> science = [];
+  List<dynamic> science = [];
   void getScience() {
     emit(NewsScienceLoadingState());
     DioHelper.getData(
@@ -81,7 +79,7 @@ class NewsCubit extends Cubit<NewsStates> {
     });
   }
 
-  static List<BottomNavigationBarItem> bottomNavigationBarItem = [
+  List<BottomNavigationBarItem> bottomNavigationBarItem = [
     const BottomNavigationBarItem(
       icon: Icon(Icons.business),
       label: 'Business',
@@ -94,25 +92,42 @@ class NewsCubit extends Cubit<NewsStates> {
       icon: Icon(Icons.science),
       label: 'Science',
     ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.settings),
-      label: 'Settings',
-    ),
   ];
 
-  static List<Widget> screens = const [
+  List<Widget> screens = const [
     BusinessScreen(),
     SportsScreen(),
     ScienceScreen(),
-    SettingsScreen(),
   ];
 
   void changeBottomNavBar(int index) {
-
     currentIndex = index;
-if (currentIndex==1) {
-  getSports();
-}
+    if (currentIndex == 1) {
+      getSports();
+    }
     emit(NewsBottomNavState());
+  }
+
+  List<dynamic> search =  [];
+
+  void getSearch(String value) {
+    emit(NewsSearchLoadingState());
+    DioHelper.getData(
+      url: 'https://newsapi.org/v2/everything',
+      query: {
+        'q': value,
+        'apiKey': '936baf92deca4675855c1a60bd63921d',
+      },
+    )
+        .then((value) => {
+              search = value.data['articles'],
+              // ignore: avoid_print
+              print(search[0]['articles']),
+              emit(NewsSearchSuccesState()),
+            })
+        .catchError((error) {
+      print(error.toString());
+      emit(NewsSearchErrorState(error.toString()));
+    });
   }
 }
